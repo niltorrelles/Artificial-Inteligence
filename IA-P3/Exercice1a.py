@@ -48,7 +48,7 @@ def upgrade_q_table(q_table, currentState, nextState):
 
 # Implementation of the q_learning_algorithm!
 def q_learning_algorithm(start_state, q_values, rewards_table, convergence_threshold=0.001):
-    print_interval = 200  # The Q table will be printed every 200 episodes
+    print_interval = 10  # The Q table will be printed every 200 episodes
 
     prev_q_values = q_values.copy()  # Safe the latest q-table (will be used for the convergence)
 
@@ -85,8 +85,8 @@ def q_learning_algorithm(start_state, q_values, rewards_table, convergence_thres
             break
 
         # Print the intermediate Q-table
-        if episode % print_interval == 0:
-            print(f'\nQ-Table after {episode} episodes:\n')
+        if (episode + 1) % print_interval == 0 or episode == 0:
+            print(f'\nQ-Table after {episode + 1} episodes:\n')
             print(q_values)
 
         prev_q_values = q_values.copy()

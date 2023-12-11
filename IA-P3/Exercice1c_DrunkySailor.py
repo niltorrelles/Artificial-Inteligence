@@ -59,13 +59,14 @@ def upgrade_q_table(q_table, currentState, nextState):
     pass
 
 
+
 # Implementation of the q_learning_algorithm!
 def q_learning_algorithm(start_state, q_values, rewards_table, convergence_threshold=0.001):
-    print_interval = 200  # The Q table will be printed every 200 episodes
-
+    print_interval = 10  # The Q table will be printed every 10 episodes
+    
+    episode = 0 
     prev_q_values = q_values.copy()  # Safe the latest q-table (will be used for the convergence)
 
-    episode = 0
     while True:
         # Get the starting location for this episode
         current_state = start_state
@@ -77,7 +78,7 @@ def q_learning_algorithm(start_state, q_values, rewards_table, convergence_thres
 
             # Perform the chosen action, and transition to the next state
             old_row_index, old_column_index = current_state
-            next_state = get_next_location(current_state, action_index)
+            next_state = get_next_location(current_state, action_index, episode)
 
             # Receive the reward for moving to the new state, and calculate the temporal difference
             reward = rewards_table[next_state[0], next_state[1]]
@@ -90,16 +91,15 @@ def q_learning_algorithm(start_state, q_values, rewards_table, convergence_thres
 
             # Update the current state for the next iteration
             current_state = next_state
-
         # Verify if the convergence was reached
         if episode > 0 and np.max(np.abs(q_values - prev_q_values)) < convergence_threshold:
-            print(f'Convergence achieved after {episode} episodes!')
+            print(f'Convergence achieved after {episode + 1} episodes!')
             print('Training completed!')
             break
 
         # Print the intermediate Q-table
-        if episode % print_interval == 0:
-            print(f'\nQ-Table after {episode} episodes:\n')
+        if (episode + 1) % print_interval == 0 or episode == 0:
+            print(f'\nQ-Table after {episode + 1} episodes:\n')
             print(q_values)
 
         prev_q_values = q_values.copy()
@@ -163,7 +163,7 @@ def get_next_action(current_state, q_values):
               
 
 # Define a function that will get the next location based on the chosen action
-def get_next_location(current_state, action_index):
+def get_next_location(current_state, action_index, n_episode):
     current_row_index, current_column_index = current_state
     new_row_index = current_row_index
     new_column_index = current_column_index
@@ -181,7 +181,7 @@ def get_next_location(current_state, action_index):
             new_row_index += 1
     else:
         # With 1% probability, move randomly
-        print("Oh oh, I'm drunky drunky! (Random action)")
+        print(f"Oh oh, I'm drunky drunky! (Random action) at Episode: {n_episode + 1}")
         random_action = np.random.randint(4)
         while not(is_valid_move(current_state, random_action)):
             random_action = np.random.randint(4)
@@ -195,12 +195,13 @@ def get_next_location(current_state, action_index):
         elif random_action == LEFT and current_column_index > 0:
             print('\nLEFT was selected!')
             new_column_index -= 1
-        elif action_index == DOWN and current_row_index < environment_rows - 1:
+        elif random_action == DOWN and current_row_index < environment_rows - 1:
             print('\nDOWN was selected!')
             new_row_index += 1
 
     next_state = (new_row_index, new_column_index)
     return next_state
+
 
 # get the shortest path given an start state
 def shortest_path(start_state, rewards_table, q_values):
@@ -230,7 +231,8 @@ def shortest_path(start_state, rewards_table, q_values):
                 final_actions.append('DOWN')
                 
             # now we move to the next location in the path
-            next_state = get_next_location(current_state, action_index)
+            episode = 0
+            next_state = get_next_location(current_state, action_index, episode)
             shortest_path.append([next_state[0], next_state[1]])
 
             # update the current state for the next iteration
@@ -239,7 +241,7 @@ def shortest_path(start_state, rewards_table, q_values):
     return shortest_path
 
 def main():
-    print("In this problem or agent is a DRUNKY SAILOR!\n")
+    print("In this problem our agent is a DRUNKY SAILOR!\n")
     # Our initial matrix is a 3,4 so let's inicialize it, and 4 possible actions
     q_values = q_table_create(environment_rows, environment_columns ,4)
     print("\nInitial Q-Table:\n")
